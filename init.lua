@@ -10,6 +10,7 @@ local rules = {
 	"Do not advertise for other servers on our server!",
 	"Respect other users and the mods/admins!",
 }
+local read_delay = 5
 
 local cnt, corners, fx, fy, text_to_labels, get_formspec, rules_form, plist, waiters, font_size, stuff_defined
 local function define_stuff()
@@ -105,7 +106,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				num = num+1
 				waiters[pname] = true
 				minetest.show_formspec(pname, "rule", get_formspec(num))
-				minetest.after(2, function(pname, num)
+				minetest.after(read_delay, function(pname, num)
 					if waiters[pname] then
 						plist[pname] = num
 						minetest.show_formspec(pname, "rule", get_formspec(num, true))
