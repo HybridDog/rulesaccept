@@ -12,8 +12,38 @@ local rules = {
 }
 local read_delay = 5
 
-local cnt, corners, fx, fy, text_to_labels, get_formspec, rules_form, plist, waiters, font_size, stuff_defined
+local cnt, corners, fx, fy, text_to_labels, get_formspec, rules_form, plist, waiters, font_size, stuff_defined, disallowed_players, table_contains, save_players
 local function define_stuff()
+
+	function table_contains(t, v)
+		for _,i in pairs(t) do
+			if i == v then
+				return true
+			end
+		end
+		return false
+	end
+
+	disallowed_players = {}
+	local file = io.open(minetest.get_worldpath().."/rulesaccept", "r")
+	if file then
+		local contents = file:read("*all")
+		io.close(file)
+		if contents then
+			disallowed_players = string.split(contents, " ")
+		end
+	end
+
+	function save_players()
+		local output = ""
+		for _,name in ipairs(disallowed_players) do
+			output = output..name.." "
+		end
+		local f = io.open(minetest.get_worldpath().."/rulesaccept", "w")
+		f:write(output)
+		io.close(f)
+	end
+
 	if minetest.is_singleplayer() then
 		font_size = tonumber(minetest.setting_get("font_size")) or 13
 	else
@@ -101,6 +131,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				end
 				privs.interact = true
 				minetest.set_player_privs(pname, privs)
+				table.insert(disallowed_players, pname)
+				save_players()
 				minetest.chat_send_player(pname, "Interact granted!")
 			else
 				num = num+1
@@ -137,7 +169,8 @@ minetest.register_chatcommand("show_rules", {
 			stuff_defined = true
 		end
 
-		if privs.interact then
+		if privs.interact
+		or table_contains(disallowed_players, name) then
 			minetest.show_formspec(name, "rule", rules_form)
 			return true, "Showing rules..."
 		end
