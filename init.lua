@@ -1,3 +1,5 @@
+local time_load_start = os.clock()
+
 --http://minetest.web1337.net/rules.php <rules of zegaton
 local rules = {
 	"Do not grief!",
@@ -190,3 +192,5 @@ minetest.register_on_joinplayer(function(player)
 		minetest.chat_send_player(name, "Welcome, "..name..", write /show_rules into the chat and accept these rules if you want to get interact.")
 	end
 end)
+
+print(string.format("[rulesaccept] loaded after ca. %.2fs", os.clock() - time_load_start))
